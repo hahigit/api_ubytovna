@@ -9,7 +9,6 @@ const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const port = Number(process.env.PORT ?? 8001);
 const host = process.env.HOST ?? '0.0.0.0';
 const seedFile = resolve(root, process.env.SEED_FILE ?? 'seeds/seed_a.json');
-// Každý poskytovatel (instance) musí mít vlastní DATA_FILE – soubor drží v paměti jen jeden proces.
 const dataFile = resolve(root, process.env.DATA_FILE ?? 'data/db.json');
 
 let store, created, nightsAdded;
@@ -28,7 +27,7 @@ app.log.info(
 );
 
 const shutdown = async () => {
-  await app.close(); // počká na rozběhnuté požadavky, tedy i na zápisy ve frontě
+  await app.close();
   process.exit(0);
 };
 process.on('SIGINT', shutdown);

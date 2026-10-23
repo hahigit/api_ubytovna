@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Planovac\Service;
 
-/** Jednoduchá souborová cache s TTL (JSON soubory v adresáři). */
 final class FileCache
 {
-    /** @var \Closure(): int */
     private \Closure $now;
 
     public function __construct(private readonly string $dir, private readonly int $ttl, ?\Closure $now = null)
@@ -32,7 +30,7 @@ final class FileCache
     public function set(string $key, mixed $value): void
     {
         if (!is_dir($this->dir) && !@mkdir($this->dir, 0775, true) && !is_dir($this->dir)) {
-            return; // cache je jen optimalizace, její selhání nesmí shodit požadavek
+            return;
         }
         $tmp = $this->path($key) . '.' . bin2hex(random_bytes(4));
         $json = json_encode(['expires' => ($this->now)() + $this->ttl, 'value' => $value], JSON_UNESCAPED_UNICODE);

@@ -1,7 +1,3 @@
-// Mock cizího "Lokální atrakce API". Spouští se vícekrát s různými daty:
-//   DATA_FILE=data/attractions_a.json PORT=8101 node server.js
-//   DATA_FILE=data/attractions_b.json PORT=8102 node server.js
-// Volitelně DELAY_MS=3000 zpomalí odpovědi (pro testování timeoutu v Plánovači).
 import Fastify from 'fastify';
 import cors from '@fastify/cors';
 import { readFileSync } from 'node:fs';
@@ -36,7 +32,6 @@ app.get('/attractions/date/', async (request, reply) => {
   if (typeof city !== 'string' || city.trim() === '') {
     return reply.status(400).send(error('VALIDATION_ERROR', "Chybí povinný parametr 'city'."));
   }
-  // Pro město bez atrakcí vracíme prázdný seznam, ne chybu.
   const attractions = data.attractions.filter((a) => cityKey(a.location) === cityKey(city));
   return { service: SERVICE, version: VERSION, attractions };
 });

@@ -6,11 +6,6 @@ namespace Planovac;
 
 final class PriceCalculator
 {
-    /**
-     * Cena atrakce pro skupinu: jednotková cena × počet lidí, pokud není zdarma.
-     * @param array{price_czk?: mixed, price_eur?: mixed, is_free?: mixed} $pricing
-     * @return array{unit_price_czk: float|int, unit_price_eur: float, quantity: int, price_czk: float|int, price_eur: float}
-     */
     public static function attraction(array $pricing, int $people): array
     {
         $free = ($pricing['is_free'] ?? false) === true;
@@ -25,11 +20,6 @@ final class PriceCalculator
         ];
     }
 
-    /**
-     * Součet položek objednávky (každá položka má price_czk a price_eur).
-     * @param list<array{price_czk: int|float, price_eur: int|float}> $items
-     * @return array{czk: int|float, eur: float}
-     */
     public static function total(array $items): array
     {
         $czk = 0;

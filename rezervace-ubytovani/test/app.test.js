@@ -7,13 +7,13 @@ import { buildApp } from '../src/app.js';
 import { JsonStore, extendAvailability, loadSeedFile } from '../src/store.js';
 import { addDays, isWeekendNight } from '../src/dates.js';
 
-const TODAY = '2026-11-02'; // pondělí
+const TODAY = '2026-11-02';
 const seedA = loadSeedFile(fileURLToPath(new URL('../seeds/seed_a.json', import.meta.url)));
 
 let app;
 let store;
 let tmp;
-let dataFile; // DATA_FILE v dočasné složce (podsložka zatím neexistuje – musí ji vytvořit store)
+let dataFile;
 
 beforeEach(async () => {
   tmp = mkdtempSync(join(tmpdir(), 'ubytovani-test-'));
@@ -34,7 +34,7 @@ const roomOf = (data, hotelId, roomId) =>
 const search = (body) => app.inject({ method: 'POST', url: '/search-hotels', payload: body });
 const reserve = (body) => app.inject({ method: 'POST', url: '/make-reservation', payload: body });
 
-const stay = { date_from: addDays(TODAY, 3), date_to: addDays(TODAY, 6) }; // čt–ne, 3 noci (čt, pá, so)
+const stay = { date_from: addDays(TODAY, 3), date_to: addDays(TODAY, 6) };
 const reservationBody = {
   hotel_id: 'HOTEL-PRG-01',
   room_id: 'R101',
@@ -61,7 +61,7 @@ describe('seed a JSON soubor', () => {
   it('opakované doplnění dostupnosti nic nezdvojí ani nepřepíše', () => {
     const data = structuredClone(store.data);
     expect(extendAvailability(data, seedA, TODAY)).toBe(0);
-    expect(extendAvailability(data, seedA, addDays(TODAY, 1))).toBe(4); // 4 pokoje × 1 nový den
+    expect(extendAvailability(data, seedA, addDays(TODAY, 1))).toBe(4);
   });
 
   it('rezervace přežije restart a rezervované noci se do dostupnosti nevrátí', async () => {
@@ -86,14 +86,14 @@ describe('seed a JSON soubor', () => {
 
   it('při selhání zápisu na disk zůstanou data v paměti beze změny', async () => {
     const original = store.file;
-    store.file = join(tmp, 'neexistuje', 'db.json'); // zápis .tmp selže
+    store.file = join(tmp, 'neexistuje', 'db.json');
     const failed = await reserve(reservationBody);
     expect(failed.statusCode).toBe(500);
     expect(failed.json().error.code).toBe('INTERNAL_ERROR');
     expect(store.data.reservations).toEqual({});
 
     store.file = original;
-    expect((await reserve(reservationBody)).statusCode).toBe(201); // noci jsou pořád volné, fronta běží dál
+    expect((await reserve(reservationBody)).statusCode).toBe(201);
   });
 });
 
@@ -216,7 +216,7 @@ describe('POST /make-reservation', () => {
     const second = await reserve({ ...reservationBody, guest_name: 'Petra Svobodová', guest_email: 'petra@example.cz' });
     expect(second.statusCode).toBe(409);
     expect(second.json().error.code).toBe('ROOM_NOT_AVAILABLE');
-    expect(readFileSync(dataFile, 'utf8')).toBe(before); // při 409 se soubor nezmění
+    expect(readFileSync(dataFile, 'utf8')).toBe(before);
   });
 
   it('částečně překrývající se termín → 409, navazující termín projde', async () => {
@@ -236,7 +236,6 @@ describe('POST /make-reservation', () => {
   });
 
   it('souběžné překrývající se termíny: žádná noc není rezervovaná dvakrát', async () => {
-    // 10 požadavků po 2 nocích, každý začíná o den později → sousední se překrývají
     const bodies = Array.from({ length: 10 }, (_, i) => ({
       ...reservationBody,
       date_from: addDays(TODAY, 10 + i),

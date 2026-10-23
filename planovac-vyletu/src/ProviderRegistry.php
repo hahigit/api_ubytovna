@@ -6,10 +6,8 @@ namespace Planovac;
 
 final class ProviderRegistry
 {
-    /** @var array<string, Provider> */
     private array $providers = [];
 
-    /** @param list<array<string, mixed>> $config */
     public function __construct(array $config)
     {
         foreach ($config as $row) {
@@ -21,13 +19,11 @@ final class ProviderRegistry
         }
     }
 
-    /** @return list<Provider> */
     public function all(): array
     {
         return array_values($this->providers);
     }
 
-    /** @return list<Provider> */
     public function byType(string $type): array
     {
         return array_values(array_filter($this->providers, fn (Provider $p) => $p->type === $type));
@@ -38,7 +34,6 @@ final class ProviderRegistry
         return $this->providers[$id] ?? null;
     }
 
-    /** Vrátí poskytovatele daného typu, jinak vyhodí 400. */
     public function require(string $id, string $type): Provider
     {
         $provider = $this->find($id);

@@ -45,7 +45,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         rmdir($this->tmpDir);
     }
 
-    /** @return array<string, mixed> */
     protected function config(): array
     {
         return [
@@ -90,9 +89,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         return new TripPlanner($this->registry(), $this->gateway(), $this->orders());
     }
 
-    // ---- vzorová data poskytovatelů ------------------------------------
-
-    /** @return array<string, mixed> */
     protected static function hotelsResponse(string $hotelId, string $city, int $czk, float $eur): array
     {
         return [
@@ -115,7 +111,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /** @return array<string, mixed> */
     protected static function pragueAttractions(): array
     {
         return [
@@ -128,7 +123,6 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    /** @return array<string, mixed> */
     protected static function cityNotFound(): array
     {
         return ['error' => ['code' => 'CITY_NOT_FOUND', 'message' => 'Lokalita není v nabídce.']];

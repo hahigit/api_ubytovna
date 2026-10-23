@@ -18,7 +18,6 @@ final class OfferAggregatorTest extends TestCase
             ->json('POST', self::ACC_A . '/search-hotels', self::hotelsResponse('HOTEL-PRG-01', 'Praha', 2100, 85.0))
             ->timeout('POST', self::ACC_B . '/search-hotels')
             ->json('GET', self::ATTR_A . '/attractions/date/', self::pragueAttractions());
-        // atrakce-b neběží (connection refused)
 
         $offer = $this->aggregator()->offer(self::FAR, self::TODAY);
 
@@ -43,7 +42,6 @@ final class OfferAggregatorTest extends TestCase
         self::assertStringContainsString('nedostupná', $failures['atrakce-b']);
         self::assertSame(2, $offer['summary']['providers_failed']);
 
-        // Termín mimo 16denní předpověď: předpověď se nevolá, výpadek geocodingu není chyba.
         self::assertFalse($offer['weather']['available']);
         self::assertStringContainsString('16 dní', $offer['weather']['reason']);
         self::assertSame([], $this->fake->requestsTo(self::FORECAST));
@@ -174,7 +172,6 @@ final class OfferAggregatorTest extends TestCase
         self::assertSame([], $this->fake->requestsTo(self::FORECAST));
     }
 
-    /** @return iterable<string, array{0: array<string, mixed>}> */
     public static function unknownCityDates(): iterable
     {
         yield 'v rozsahu předpovědi' => [self::NEAR];

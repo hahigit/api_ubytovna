@@ -1,8 +1,4 @@
 #!/usr/bin/env bash
-# Spustí všechny služby na pozadí:
-#   8000 Plánovač výletů (PHP)       8001/8002 Rezervace ubytování A/B (Node)
-#   8101/8102 Mock Lokální atrakce A/B (Node)
-# Logy: logs/<služba>.log, PID: .pids  ·  zastavení: ./stop_all.sh
 set -euo pipefail
 cd "$(dirname "$0")"
 ROOT="$(pwd)"
@@ -17,14 +13,13 @@ if [[ -f .pids ]]; then
   exit 1
 fi
 
-# Závislosti (jen pokud chybí)
 [[ -d rezervace-ubytovani/node_modules ]] || (cd rezervace-ubytovani && npm install --no-audit --no-fund)
 [[ -d mocks/atrakce-mock/node_modules ]] || (cd mocks/atrakce-mock && npm install --no-audit --no-fund)
 if [[ ! -d planovac-vyletu/vendor ]]; then
   (cd planovac-vyletu && ${COMPOSER_BIN:-composer} install --no-interaction)
 fi
 
-start() { # název, adresář, příkaz...
+start() {
   local name="$1" dir="$2"; shift 2
   (cd "$ROOT/$dir" && exec env "$@" >"$ROOT/logs/$name.log" 2>&1) &
   echo "$! $name" >> .pids
@@ -35,7 +30,6 @@ start ubytovani-a rezervace-ubytovani PORT=8001 SEED_FILE=seeds/seed_a.json DATA
 start ubytovani-b rezervace-ubytovani PORT=8002 SEED_FILE=seeds/seed_b.json DATA_FILE=data/db_b.json PROVIDER_NAME="Ubytování B" node src/server.js
 start atrakce-a   mocks/atrakce-mock  PORT=8101 DATA_FILE=data/attractions_a.json node server.js
 start atrakce-b   mocks/atrakce-mock  PORT=8102 DATA_FILE=data/attractions_b.json node server.js
-# PHP_CLI_SERVER_WORKERS: vestavěný server obslouží víc požadavků najednou
 start planovac    planovac-vyletu     PHP_CLI_SERVER_WORKERS=4 "$PHP_BIN" -S 0.0.0.0:8000 -t public public/index.php
 
 echo -n "Čekám na služby"

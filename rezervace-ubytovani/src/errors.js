@@ -1,5 +1,3 @@
-// Jednotný tvar chyb: {"error": {"code": "...", "message": "..."}}
-
 export class ApiError extends Error {
   constructor(statusCode, code, message, details) {
     super(message);
@@ -27,7 +25,6 @@ function fieldName(v) {
   return v.instancePath ? v.instancePath.replace(/^\//, '').replace(/\//g, '.') : '';
 }
 
-/** Převede chybu z AJV (JSON schema) na srozumitelnou českou hlášku. */
 export function translateValidationError(v) {
   const field = fieldName(v);
   const p = v.params ?? {};

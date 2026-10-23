@@ -11,7 +11,6 @@ use Psr\Http\Message\RequestInterface;
 
 final class TripPlannerTest extends TestCase
 {
-    /** @return array<string, mixed> */
     private static function input(array $override = []): array
     {
         return $override + [
@@ -65,12 +64,10 @@ final class TripPlannerTest extends TestCase
         self::assertMatchesRegularExpression('/^ORD-20261102-[0-9A-F]{8}$/', $order['order_id']);
         self::assertSame(['accommodation', 'attraction', 'attraction'], array_column($order['items'], 'type'));
         self::assertSame('RES-20261105-ABCD1234', $order['items'][0]['reservation_id']);
-        // 9300 (ubytování) + 0 (Karlův most zdarma) + 2 × 350 (muzeum)
         self::assertSame(['czk' => 10000, 'eur' => 406.0], $order['total_price']);
         self::assertSame(0, $order['items'][1]['price_czk']);
         self::assertSame(700, $order['items'][2]['price_czk']);
 
-        // Rezervace šla k vybranému poskytovateli se správnými údaji, k jinému ne.
         self::assertSame([], $this->fake->requestsTo(self::ACC_A));
         $sent = json_decode((string) $this->fake->requestsTo(self::ACC_B . '/make-reservation')[0]->getBody(), true);
         self::assertSame([

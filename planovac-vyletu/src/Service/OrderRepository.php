@@ -4,14 +4,6 @@ declare(strict_types=1);
 
 namespace Planovac\Service;
 
-/**
- * Objednávky v jednom JSON souboru {"orders": {"<order_id>": {...}}}.
- *
- * Zápis: exkluzivní zámek (flock LOCK_EX) na vedlejším souboru <soubor>.lock → načtení
- * aktuálního obsahu → zápis do dočasného souboru → fsync → rename. Zámek je na zvláštním
- * souboru, protože rename vymění inode datového souboru. Díky tomu se nepřepíšou souběžné
- * zápisy z více PHP procesů (PHP_CLI_SERVER_WORKERS) a soubor se při pádu neporuší.
- */
 final class OrderRepository
 {
     public function __construct(private readonly string $file)
@@ -22,7 +14,6 @@ final class OrderRepository
         }
     }
 
-    /** @param array<string, mixed> $order */
     public function save(array $order): void
     {
         $this->withLock(LOCK_EX, function () use ($order): void {
@@ -32,17 +23,11 @@ final class OrderRepository
         });
     }
 
-    /** @return array<string, mixed>|null */
     public function find(string $orderId): ?array
     {
         return $this->withLock(LOCK_SH, fn () => $this->read()['orders'][$orderId] ?? null);
     }
 
-    /**
-     * @template T
-     * @param \Closure(): T $fn
-     * @return T
-     */
     private function withLock(int $mode, \Closure $fn): mixed
     {
         $lock = fopen($this->file . '.lock', 'c');
@@ -57,7 +42,6 @@ final class OrderRepository
         }
     }
 
-    /** @return array{orders: array<string, array<string, mixed>>} */
     private function read(): array
     {
         if (!is_file($this->file)) {
@@ -75,7 +59,6 @@ final class OrderRepository
         return $data;
     }
 
-    /** @param array<string, mixed> $data */
     private function writeAtomically(array $data): void
     {
         $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT | JSON_PRESERVE_ZERO_FRACTION | JSON_THROW_ON_ERROR);

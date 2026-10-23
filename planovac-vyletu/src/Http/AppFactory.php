@@ -25,9 +25,6 @@ final class AppFactory
     public const SERVICE = 'Plánovač výletů API';
     public const VERSION = '1.0';
 
-    /**
-     * @param \Closure(): string $today vrací dnešní datum YYYY-MM-DD (v testech lze podstrčit)
-     */
     public static function create(
         ProviderRegistry $registry,
         ProviderGateway $gateway,
@@ -40,7 +37,6 @@ final class AppFactory
         $app = SlimAppFactory::create();
 
         $app->get('/', function (Request $request, Response $response) use ($registry, $gateway, $statusTimeout) {
-            // Živá kontrola všech poskytovatelů – paralelně, s krátkým timeoutem.
             $promises = [];
             foreach ($registry->all() as $p) {
                 $promises[$p->id] = $gateway->describeAsync($p, min($statusTimeout, $p->timeout));
@@ -117,8 +113,6 @@ final class AppFactory
             return self::json($response, self::error('INTERNAL_ERROR', 'Interní chyba serveru.'), 500);
         });
 
-        // CORS hlavičky na všech odpovědích včetně chyb (middleware přidaný jako poslední je nejvíc vně).
-        // Preflight (OPTIONS) se odbaví rovnou, bez routování.
         $app->add(function (Request $request, RequestHandlerInterface $handler) use ($app): Response {
             $response = $request->getMethod() === 'OPTIONS'
                 ? $app->getResponseFactory()->createResponse(204)
@@ -145,7 +139,6 @@ final class AppFactory
         }
     }
 
-    /** @return array{error: array{code: string, message: string}} */
     private static function error(string $code, string $message): array
     {
         return ['error' => ['code' => $code, 'message' => $message]];

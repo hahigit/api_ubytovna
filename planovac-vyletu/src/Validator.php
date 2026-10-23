@@ -4,23 +4,17 @@ declare(strict_types=1);
 
 namespace Planovac;
 
-/** Validace vstupů Plánovače. Sbírá všechny chyby a vyhodí jednu ApiException 400. */
 final class Validator
 {
     public const MAX_NIGHTS = 30;
     public const MAX_PEOPLE = 20;
 
-    /** @var list<string> */
     private array $errors = [];
 
     public function __construct(private readonly string $today)
     {
     }
 
-    /**
-     * Ověří město, termín a počet osob.
-     * @return array{city: string, date_from: string, date_to: string, people: int}
-     */
     public function stay(mixed $city, mixed $dateFrom, mixed $dateTo, mixed $people, string $peopleField = 'people'): array
     {
         $city = $this->city($city);

@@ -18,7 +18,6 @@ final class Provider
     ) {
     }
 
-    /** @param array<string, mixed> $row */
     public static function fromArray(array $row): self
     {
         foreach (['id', 'type', 'name', 'base_url'] as $key) {
@@ -37,7 +36,6 @@ final class Provider
         return $this->baseUrl . $path;
     }
 
-    /** @return array<string, mixed> */
     public function toArray(): array
     {
         return ['id' => $this->id, 'type' => $this->type, 'name' => $this->name, 'base_url' => $this->baseUrl, 'timeout' => $this->timeout];

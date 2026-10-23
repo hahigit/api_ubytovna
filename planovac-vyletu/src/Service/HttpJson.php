@@ -10,17 +10,12 @@ use GuzzleHttp\Exception\RequestException;
 use GuzzleHttp\Promise\PromiseInterface;
 use Psr\Http\Message\ResponseInterface;
 
-/**
- * Asynchronní JSON volání přes Guzzle. Promise se splní dekódovaným polem,
- * nebo se zamítne s UpstreamException (vždy s českým důvodem).
- */
 final class HttpJson
 {
     public function __construct(private readonly ClientInterface $http)
     {
     }
 
-    /** @param array<string, mixed> $options */
     public function requestAsync(string $method, string $url, float $timeout, array $options = []): PromiseInterface
     {
         $options += [
@@ -38,7 +33,6 @@ final class HttpJson
         );
     }
 
-    /** @return array<mixed> */
     public static function decode(ResponseInterface $response): array
     {
         $body = (string) $response->getBody();

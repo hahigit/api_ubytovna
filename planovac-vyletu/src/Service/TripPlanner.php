@@ -12,10 +12,6 @@ use Planovac\Provider;
 use Planovac\ProviderRegistry;
 use Planovac\Validator;
 
-/**
- * POST /plan-trip: ověří vstup a vybrané nabídky, zarezervuje ubytování u správného
- * poskytovatele, přidá atrakce (jen evidence) a uloží objednávku.
- */
 final class TripPlanner
 {
     public function __construct(
@@ -25,16 +21,10 @@ final class TripPlanner
     ) {
     }
 
-    /**
-     * @param mixed $input dekódované tělo požadavku
-     * @return array<string, mixed> potvrzená objednávka
-     * @throws ApiException 400/404 chybný vstup, 409/502/504 neúspěšná rezervace (s uloženou objednávkou ve stavu failed)
-     */
     public function plan(mixed $input, string $today): array
     {
         [$stay, $customer, $attractionRefs, $accommodationRef] = $this->validate($input, $today);
 
-        // 1) Ověřit poskytovatele (existence a typ) ještě před jakýmkoli voláním.
         $accommodationProvider = $accommodationRef !== null
             ? $this->registry->require($accommodationRef['source'], Provider::TYPE_ACCOMMODATION)
             : null;
@@ -43,10 +33,8 @@ final class TripPlanner
             $attractionProviders[$ref['source']] = $this->registry->require($ref['source'], Provider::TYPE_ATTRACTIONS);
         }
 
-        // 2) Načíst aktuální ceny atrakcí přímo od poskytovatelů (paralelně) – cenám od klienta nevěříme.
         $items = $this->attractionItems($attractionRefs, $attractionProviders, $stay);
 
-        // 3) Rezervace ubytování – jediný krok, který může selhat až po validaci.
         $failure = null;
         if ($accommodationProvider !== null) {
             try {
@@ -77,7 +65,6 @@ final class TripPlanner
         }
 
         if ($failure !== null) {
-            // Objednávka se nepotvrzuje – ani atrakce se neevidují.
             $items = array_map(fn ($i) => $i['type'] === 'attraction' ? [...$i, 'status' => 'cancelled'] : $i, $items);
         }
 
@@ -109,9 +96,6 @@ final class TripPlanner
         return $order;
     }
 
-    /**
-     * @return array{0: array{city: string, date_from: string, date_to: string, people: int}, 1: array{name: string, email: string}, 2: list<array{source: string, id: string}>, 3: array{source: string, hotel_id: string, room_id: string}|null}
-     */
     private function validate(mixed $input, string $today): array
     {
         if (!is_array($input) || array_is_list($input) && $input !== []) {
@@ -171,12 +155,6 @@ final class TripPlanner
         return [$stay, $customer, $attractions, $accommodation];
     }
 
-    /**
-     * @param list<array{source: string, id: string}> $refs
-     * @param array<string, Provider> $providers
-     * @param array{city: string, date_from: string, date_to: string, people: int} $stay
-     * @return list<array<string, mixed>>
-     */
     private function attractionItems(array $refs, array $providers, array $stay): array
     {
         if ($refs === []) {
@@ -212,16 +190,12 @@ final class TripPlanner
                 'location' => $a['location'],
                 'attraction_type' => $a['type'],
                 'is_free' => $a['pricing']['is_free'],
-                'status' => 'registered', // atrakční API nemá rezervace – jen evidence v objednávce
+                'status' => 'registered',
             ] + PriceCalculator::attraction($a['pricing'], $stay['people']);
         }
         return $items;
     }
 
-    /**
-     * @param array<string, mixed> $r odpověď POST /make-reservation
-     * @return array<string, mixed>
-     */
     private static function accommodationItem(Provider $p, array $r): array
     {
         return [

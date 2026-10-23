@@ -13,15 +13,9 @@ use GuzzleHttp\Psr7\Response;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-/**
- * Falešný HTTP handler pro Guzzle: odpovědi se určují podle "METODA URL-prefix",
- * takže nezáleží na pořadí paralelních požadavků. Nenamapovaná URL = služba neběží.
- */
 final class FakeHttp
 {
-    /** @var list<array{0: string, 1: mixed}> */
     private array $routes = [];
-    /** @var list<RequestInterface> */
     public array $requests = [];
 
     public function on(string $method, string $urlPrefix, mixed $result): self
@@ -50,7 +44,6 @@ final class FakeHttp
         return new Client(['handler' => HandlerStack::create($this)]);
     }
 
-    /** @param array<string, mixed> $options */
     public function __invoke(RequestInterface $request, array $options): PromiseInterface
     {
         $this->requests[] = $request;
@@ -66,7 +59,6 @@ final class FakeHttp
         return Create::rejectionFor(new ConnectException('cURL error 7: Connection refused', $request, null, ['errno' => 7]));
     }
 
-    /** @return list<RequestInterface> */
     public function requestsTo(string $urlPrefix): array
     {
         return array_values(array_filter($this->requests, fn ($r) => str_starts_with((string) $r->getUri(), $urlPrefix)));

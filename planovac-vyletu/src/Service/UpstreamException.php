@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Planovac\Service;
 
-/** Selhání navazujícího API, převedené na srozumitelný český důvod. */
 final class UpstreamException extends \RuntimeException
 {
     public const TIMEOUT = 'timeout';
@@ -27,7 +26,6 @@ final class UpstreamException extends \RuntimeException
         return $this->kind === self::TIMEOUT;
     }
 
-    /** HTTP kód, který má Plánovač vrátit klientovi, když tato chyba znemožní požadavek. */
     public function gatewayStatus(): int
     {
         return $this->isTimeout() ? 504 : 502;

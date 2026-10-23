@@ -14,7 +14,6 @@ final class OrderRepositoryTest extends TestCase
         return $this->config()['data_file'];
     }
 
-    /** @return array<string, mixed> */
     private static function order(string $id): array
     {
         return ['order_id' => $id, 'status' => 'confirmed', 'created_at' => '2026-11-02T10:00:00+01:00', 'customer' => ['name' => 'Jiří Žák'], 'total_price' => ['czk' => 100, 'eur' => 4.0]];

@@ -7,18 +7,12 @@ namespace Planovac\Service;
 use GuzzleHttp\Promise\PromiseInterface;
 use Planovac\Provider;
 
-/**
- * Klient pro napojená API (kontrakty "Rezervace ubytování API" a "Lokální atrakce API").
- * Ověřuje strukturu cizích dat – neplatné položky se vynechají, ale jejich počet se hlásí
- * (pole "invalid"), aby se nic neignorovalo tiše.
- */
 final class ProviderGateway
 {
     public function __construct(private readonly HttpJson $http)
     {
     }
 
-    /** GET / – popis služby a lokality. */
     public function describeAsync(Provider $provider, float $timeout): PromiseInterface
     {
         return $this->http->requestAsync('GET', $provider->url('/'), $timeout)->then(function (array $data) {
@@ -34,11 +28,6 @@ final class ProviderGateway
         });
     }
 
-    /**
-     * POST /search-hotels. 404 CITY_NOT_FOUND znamená „lokalitu nenabízím“, nejde o chybu.
-     * @param array{city: string, date_from: string, date_to: string, people: int} $query
-     * @return PromiseInterface<array{hotels: list<array<string, mixed>>, invalid: int, not_offered: bool}>
-     */
     public function searchHotelsAsync(Provider $provider, array $query): PromiseInterface
     {
         return $this->http
@@ -59,10 +48,6 @@ final class ProviderGateway
             );
     }
 
-    /**
-     * GET /attractions/date/?city=…
-     * @return PromiseInterface<array{attractions: list<array<string, mixed>>, invalid: int}>
-     */
     public function attractionsAsync(Provider $provider, string $city): PromiseInterface
     {
         $url = $provider->url('/attractions/date/?' . http_build_query(['city' => $city]));
@@ -74,12 +59,6 @@ final class ProviderGateway
         });
     }
 
-    /**
-     * POST /make-reservation (synchronně).
-     * @param array<string, mixed> $body
-     * @return array<string, mixed>
-     * @throws UpstreamException
-     */
     public function makeReservation(Provider $provider, array $body): array
     {
         try {
@@ -94,10 +73,6 @@ final class ProviderGateway
         return $data;
     }
 
-    /**
-     * @param array<mixed> $hotels
-     * @return array{hotels: list<array<string, mixed>>, invalid: int}
-     */
     public static function validateHotels(array $hotels): array
     {
         $valid = [];
@@ -131,10 +106,6 @@ final class ProviderGateway
         return ['hotels' => $valid, 'invalid' => $invalid];
     }
 
-    /**
-     * @param array<mixed> $attractions
-     * @return array{attractions: list<array<string, mixed>>, invalid: int}
-     */
     public static function validateAttractions(array $attractions): array
     {
         $valid = [];
@@ -170,7 +141,6 @@ final class ProviderGateway
         return $night;
     }
 
-    /** @param array<mixed> $row @param list<string> $keys */
     private static function areStrings(array $row, array $keys): bool
     {
         foreach ($keys as $key) {

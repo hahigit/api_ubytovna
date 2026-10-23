@@ -16,13 +16,8 @@ use Planovac\Service\TripPlanner;
 use Planovac\Service\WeatherService;
 use Slim\App;
 
-/** Sestavení aplikace z konfigurace (sdílené pro public/index.php i testy). */
 final class Bootstrap
 {
-    /**
-     * @param array<string, mixed> $config obsah config.php
-     * @param (\Closure(): string)|null $today
-     */
     public static function app(array $config, ?ClientInterface $http = null, ?\Closure $today = null): App
     {
         date_default_timezone_set($config['timezone'] ?? 'Europe/Prague');

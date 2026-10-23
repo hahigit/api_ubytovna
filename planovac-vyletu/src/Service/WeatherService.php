@@ -8,15 +8,10 @@ use GuzzleHttp\Promise\Create;
 use GuzzleHttp\Promise\PromiseInterface;
 use Planovac\Dates;
 
-/**
- * Předpověď počasí z Open-Meteo (bez API klíče): geocoding města → denní předpověď.
- * Odpovědi Open-Meteo se cachují (výchozí TTL 30 minut).
- */
 final class WeatherService
 {
     public const NOT_FOUND = 'city_not_found';
 
-    /** WMO kódy počasí → český popis */
     private const WMO = [
         0 => 'Jasno', 1 => 'Převážně jasno', 2 => 'Polojasno', 3 => 'Zataženo',
         45 => 'Mlha', 48 => 'Mlha s námrazou',
@@ -30,9 +25,6 @@ final class WeatherService
         95 => 'Bouřka', 96 => 'Bouřka s krupobitím', 99 => 'Silná bouřka s krupobitím',
     ];
 
-    /**
-     * @param array{geocoding_url: string, forecast_url: string, timeout: float, forecast_days: int} $config
-     */
     public function __construct(
         private readonly HttpJson $http,
         private readonly FileCache $cache,
@@ -40,10 +32,6 @@ final class WeatherService
     ) {
     }
 
-    /**
-     * Promise se splní polem "weather" (available true/false), nebo zamítne s UpstreamException,
-     * pokud Open-Meteo nefunguje.
-     */
     public function forecastAsync(string $city, string $dateFrom, string $dateTo, string $today): PromiseInterface
     {
         $lastForecastDay = Dates::addDays($today, $this->config['forecast_days'] - 1);
@@ -58,7 +46,6 @@ final class WeatherService
             ),
         ];
 
-        // Geocoding běží vždy (i mimo rozsah předpovědi) – zjistí, zda město vůbec existuje.
         $promise = $this->geocodeAsync($city)->then(function (?array $place) use ($city, $start, $end, $dateTo, $outOfRange, $outOfRangeResult) {
             if ($place === null) {
                 return ['available' => false, 'reason' => "Město '$city' se nepodařilo najít v geocodingu Open-Meteo.", 'code' => self::NOT_FOUND];
@@ -83,11 +70,9 @@ final class WeatherService
             });
         });
 
-        // Mimo rozsah by se předpověď stejně nezobrazila, takže výpadek geocodingu tu není chyba.
         return $outOfRange ? $promise->otherwise(fn () => $outOfRangeResult) : $promise;
     }
 
-    /** @return PromiseInterface<array<string, mixed>|null> */
     private function geocodeAsync(string $city): PromiseInterface
     {
         $query = ['name' => $city, 'count' => 1, 'language' => 'cs', 'format' => 'json'];
@@ -106,7 +91,6 @@ final class WeatherService
         });
     }
 
-    /** @param array<string, mixed> $place */
     private function dailyAsync(array $place, string $start, string $end): PromiseInterface
     {
         $query = [
@@ -138,10 +122,6 @@ final class WeatherService
         });
     }
 
-    /**
-     * @param array<string, scalar> $query
-     * @return PromiseInterface<array{data: array<mixed>, cached: bool}>
-     */
     private function cachedGet(string $url, array $query): PromiseInterface
     {
         $fullUrl = $url . '?' . http_build_query($query);

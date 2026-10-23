@@ -1,5 +1,3 @@
-// JSON schémata pro validaci vstupů a dokumentaci (Swagger na /docs).
-
 const isoDate = (description) => ({ type: 'string', format: 'date', description, examples: ['2026-11-20'] });
 
 const errorResponse = {

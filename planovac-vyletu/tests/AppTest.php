@@ -10,10 +10,8 @@ use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
 use Slim\Psr7\Factory\StreamFactory;
 
-/** HTTP testy přes Slim (bez spouštění serveru). */
 final class AppTest extends TestCase
 {
-    /** @return array{0: int, 1: array<mixed>, 2: ResponseInterface} */
     private function call(string $method, string $uri, ?string $body = null): array
     {
         $app = Bootstrap::app($this->config(), $this->fake->client(), fn () => self::TODAY);
@@ -58,7 +56,6 @@ final class AppTest extends TestCase
         self::assertSame('Český Krumlov', json_decode((string) $this->fake->requestsTo(self::ACC_A)[0]->getBody(), true)['city']);
     }
 
-    /** @return iterable<string, array{0: string, 1: string}> */
     public static function badLocalityProvider(): iterable
     {
         yield 'neplatné datum' => ['/locality/Praha/2026-02-30/2026-03-02', 'date_from'];

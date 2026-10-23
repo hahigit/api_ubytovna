@@ -20,13 +20,6 @@ export const MAX_NIGHTS = 30;
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
-/**
- * Sestaví Fastify aplikaci nad JSON úložištěm.
- * @param {object} opts
- * @param {import('./store.js').JsonStore} opts.store
- * @param {() => string} [opts.today] vrací dnešní datum (YYYY-MM-DD), v testech lze podstrčit
- * @param {object|boolean} [opts.logger]
- */
 export async function buildApp({ store, today = todayInPrague, logger = false, providerName } = {}) {
   const app = Fastify({ logger, routerOptions: { ignoreTrailingSlash: true } });
 
@@ -43,7 +36,6 @@ export async function buildApp({ store, today = todayInPrague, logger = false, p
   await app.register(swaggerUi, { routePrefix: '/docs' });
   registerErrorHandling(app);
 
-  // ---- Čtení dat (z paměti) --------------------------------------------
   const byText = (key) => (a, b) => (a[key] < b[key] ? -1 : a[key] > b[key] ? 1 : 0);
   const findHotel = (data, hotelId) => data.hotels.find((h) => h.hotel_id === hotelId);
   const findRoom = (hotel, roomId) => hotel?.available_rooms.find((r) => r.room_id === roomId);
@@ -52,7 +44,6 @@ export async function buildApp({ store, today = todayInPrague, logger = false, p
     store.data.hotels.filter((h) => locationKey(h.location) === locationKey(city)).sort(byText('hotel_id'));
   const allHotels = () =>
     [...store.data.hotels].sort((a, b) => byText('location')(a, b) || byText('hotel_id')(a, b));
-  /** Volné noci pokoje v intervalu [from, to) – rezervované noci v availability nejsou. */
   const freeNights = (room, from, to = '9999-12-31') =>
     room.availability
       .filter((n) => n.date >= from && n.date < to)
@@ -104,8 +95,6 @@ export async function buildApp({ store, today = todayInPrague, logger = false, p
       created_at: r.created_at,
     };
   }
-
-  // ---- Endpointy --------------------------------------------------------
 
   app.get('/', { schema: rootSchema }, async () => ({
     service: SERVICE,
@@ -164,7 +153,7 @@ export async function buildApp({ store, today = todayInPrague, logger = false, p
       for (const r of roomsOf(h)) {
         if (r.capacity_persons < people) continue;
         const free = freeNights(r, date_from, date_to);
-        if (free.length !== nights.length) continue; // aspoň jedna noc není volná
+        if (free.length !== nights.length) continue;
         const totals = summarizeNights(free);
         if (price_min !== undefined && totals[priceKey] < price_min) continue;
         if (price_max !== undefined && totals[priceKey] > price_max) continue;
@@ -190,9 +179,6 @@ export async function buildApp({ store, today = todayInPrague, logger = false, p
     };
   });
 
-  // Rezervace jde přes serializovanou frontu zápisů úložiště: dva souběžné požadavky na stejný
-  // pokoj se zpracují jeden po druhém, takže druhý už noci nenajde a dostane 409.
-  // Vše se ověří dřív, než se data změní; při chybě zůstanou data i soubor beze změny.
   function reserve(draft, input, nights) {
     const hotel = findHotel(draft, input.hotel_id);
     if (!hotel) throw new ApiError(404, 'HOTEL_NOT_FOUND', `Hotel '${input.hotel_id}' neexistuje.`);
@@ -220,7 +206,6 @@ export async function buildApp({ store, today = todayInPrague, logger = false, p
       );
     }
 
-    // Teprve teď měníme data: noci zmizí z dostupnosti a vznikne rezervace.
     const reservationId = `RES-${input.date_from.replaceAll('-', '')}-${randomBytes(4).toString('hex').toUpperCase()}`;
     room.availability = room.availability.filter((n) => n.date < input.date_from || n.date >= input.date_to);
     const reservation = {

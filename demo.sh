@@ -1,15 +1,10 @@
 #!/usr/bin/env bash
-# Projde celý scénář přes curl (služby musí běžet: ./run_all.sh):
-#   GET / → GET /locality/... → POST /plan-trip → ověření rezervace u ubytování
-#   → druhý pokus o rezervaci téhož pokoje (409) → GET /orders/{id}
-# Termín se počítá od dneška (+7 dní), aby spadal do předpovědi počasí.
 set -euo pipefail
 P=http://localhost:8000
 CITY="${1:-Praha}"
 FROM=$(date -d '+7 days' +%F)
 TO=$(date -d '+9 days' +%F)
 J='Content-Type: application/json'
-# Vytáhne hodnotu z JSON na stdin (výraz v JS nad proměnnou d)
 jget() { node -e "const d=JSON.parse(require('fs').readFileSync(0,'utf8'));const v=($1);console.log(typeof v==='string'?v:JSON.stringify(v,null,2))"; }
 step() { printf '\n\033[1;34m== %s\033[0m\n' "$*"; }
 
@@ -26,7 +21,6 @@ echo "$OFFER" | jget 'd.attractions.map(g => `  [${g.source}] ${g.status}` + g.a
 echo "Počasí:"
 echo "$OFFER" | jget 'd.weather ? (d.weather.available ? d.weather.days.map(x => `  ${x.date} ${x.description}, ${x.temperature_min}–${x.temperature_max} °C, srážky ${x.precipitation_sum} mm`).join("\n") : "  " + d.weather.reason) : "  nedostupné"'
 
-# Vybereme první volný pokoj (od kteréhokoli poskytovatele) a první dvě atrakce.
 ACC=$(echo "$OFFER" | jget '(() => { for (const g of d.accommodation) for (const h of g.hotels) return {source: h.source, hotel_id: h.hotel_id, room_id: h.available_rooms[0].room_id}; return null; })()')
 ATTR=$(echo "$OFFER" | jget 'd.attractions.flatMap(g => g.attractions).slice(0, 2).map(a => ({source: a.source, id: a.id}))')
 [[ "$ACC" == "null" ]] && { echo "Žádné volné ubytování – zkuste jiné město."; exit 1; }

@@ -7,7 +7,6 @@ export const SEED_DAYS = 120;
 const SERVICE = 'Rezervace ubytování API';
 const VERSION = '1.0';
 
-/** Klíč pro porovnání měst bez ohledu na velikost písmen a diakritiku ("ceske budejovice" = "České Budějovice"). */
 export function locationKey(city) {
   return String(city).normalize('NFD').replace(/\p{Diacritic}/gu, '').trim().toLowerCase().replace(/\s+/g, ' ');
 }
@@ -20,7 +19,6 @@ export function loadSeedFile(path) {
 
 const round2 = (n) => Math.round(n * 100) / 100;
 
-/** Cena za noc: víkendové noci (pá, so) jsou lehce dražší. */
 function nightPrice(pricing, date) {
   if (isWeekendNight(date)) {
     return {
@@ -31,11 +29,6 @@ function nightPrice(pricing, date) {
   return { price_czk: pricing.price_czk, price_eur: pricing.price_eur };
 }
 
-/**
- * Doplní do dat noci na SEED_DAYS dní od `today` podle ceníků v seedu.
- * Noci, které už existují nebo jsou zarezervované, nepřidává (rezervované noci
- * v dostupnosti chybí záměrně). Vrací počet přidaných nocí.
- */
 export function extendAvailability(data, seed, today) {
   const reserved = new Set();
   for (const r of Object.values(data.reservations)) {
@@ -72,7 +65,6 @@ export function extendAvailability(data, seed, today) {
   return added;
 }
 
-/** Prázdná data se strukturou hotelů ze seedu (bez nocí). */
 export function dataFromSeed(seed, today) {
   const data = {
     service: SERVICE,
@@ -94,17 +86,6 @@ export function dataFromSeed(seed, today) {
   return data;
 }
 
-/**
- * Data služby v jednom JSON souboru, držená v paměti.
- *
- * - Čtení jde přímo z paměti (`store.data`).
- * - Zápisy jdou přes `update()`: jedna serializovaná fronta (promise chain), takže se dvě
- *   změny nikdy neprolnou. Mutace pracuje nad kopií dat – když vyhodí výjimku (např. 409)
- *   nebo selže zápis na disk, aktuální data zůstanou beze změny.
- * - Soubor se zapisuje atomicky: <soubor>.tmp → fsync → rename.
- *
- * Jeden soubor smí používat jen jeden proces (každý poskytovatel má vlastní DATA_FILE).
- */
 export class JsonStore {
   #queue = Promise.resolve();
 
@@ -113,13 +94,9 @@ export class JsonStore {
     this.data = data;
   }
 
-  /**
-   * Načte soubor; pokud neexistuje, vytvoří ho ze seedu. U existujícího souboru jen
-   * posune okno dostupnosti (doplní chybějící budoucí noci), rezervace nepřepisuje.
-   */
   static async open(file, { seed, today }) {
     mkdirSync(dirname(file), { recursive: true });
-    rmSync(`${file}.tmp`, { force: true }); // pozůstatek po případném pádu při zápisu
+    rmSync(`${file}.tmp`, { force: true });
 
     if (!existsSync(file)) {
       const store = new JsonStore(file, dataFromSeed(seed, today));
@@ -141,10 +118,6 @@ export class JsonStore {
     return { store, created: false, nightsAdded };
   }
 
-  /**
-   * Zařadí změnu do fronty. `mutator(draft)` dostane kopii dat, může ji upravit a vrátit výsledek.
-   * Po úspěšném zápisu na disk se kopie stane aktuálními daty.
-   */
   update(mutator) {
     const run = async () => {
       const draft = structuredClone(this.data);
@@ -154,7 +127,7 @@ export class JsonStore {
       return result;
     };
     const next = this.#queue.then(run);
-    this.#queue = next.catch(() => {}); // chyba jedné změny (např. 409) nezablokuje frontu
+    this.#queue = next.catch(() => {});
     return next;
   }
 

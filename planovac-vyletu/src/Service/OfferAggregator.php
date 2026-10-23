@@ -11,10 +11,6 @@ use Planovac\PriceCalculator;
 use Planovac\Provider;
 use Planovac\ProviderRegistry;
 
-/**
- * Souhrnná nabídka pro lokalitu a termín. Všechna API (ubytování, atrakce, počasí)
- * se volají paralelně; výpadek jednoho poskytovatele nezastaví ostatní.
- */
 final class OfferAggregator
 {
     public const WEATHER_SOURCE = 'open-meteo';
@@ -26,10 +22,6 @@ final class OfferAggregator
     ) {
     }
 
-    /**
-     * @param array{city: string, date_from: string, date_to: string, people: int} $q
-     * @return array<string, mixed>
-     */
     public function offer(array $q, string $today): array
     {
         $accommodationProviders = $this->registry->byType(Provider::TYPE_ACCOMMODATION);
@@ -44,7 +36,6 @@ final class OfferAggregator
         }
         $promises['weather'] = $this->weather->forecastAsync($q['city'], $q['date_from'], $q['date_to'], $today);
 
-        // Všechny požadavky běží souběžně (curl_multi pod Guzzle), čekáme na všechny.
         $results = Utils::settle($promises)->wait();
 
         $failures = [];
@@ -69,7 +60,6 @@ final class OfferAggregator
         $attractionCount = array_sum(array_map(fn ($g) => count($g['attractions']), $attractions));
         $providerFailures = array_filter($failures, fn ($f) => $f['type'] !== 'weather' && empty($f['partial']));
 
-        // Neznámé město: nikdo ho nenabízí, nic neselhalo a nezná ho ani geocoding.
         if ($hotelCount === 0 && $attractionCount === 0 && $providerFailures === []
             && ($weather['code'] ?? null) === WeatherService::NOT_FOUND
             && array_filter($accommodation, fn ($g) => !$g['not_offered']) === []) {
@@ -96,11 +86,6 @@ final class OfferAggregator
         ];
     }
 
-    /**
-     * @param array{state: string, value?: mixed, reason?: mixed} $result
-     * @param list<array<string, mixed>> $failures
-     * @return array<string, mixed>
-     */
     private function accommodationGroup(Provider $p, array $result, array $q, array &$failures): array
     {
         $group = ['source' => $p->id, 'provider_name' => $p->name, 'status' => 'ok', 'message' => null, 'hotels' => [], 'not_offered' => false];
@@ -120,11 +105,6 @@ final class OfferAggregator
         return $group;
     }
 
-    /**
-     * @param array{state: string, value?: mixed, reason?: mixed} $result
-     * @param list<array<string, mixed>> $failures
-     * @return array<string, mixed>
-     */
     private function attractionGroup(Provider $p, array $result, array $q, array &$failures): array
     {
         $group = ['source' => $p->id, 'provider_name' => $p->name, 'status' => 'ok', 'message' => null, 'attractions' => []];
@@ -144,7 +124,6 @@ final class OfferAggregator
         return $group;
     }
 
-    /** @param list<array<string, mixed>> $failures */
     private function reportInvalid(Provider $p, int $invalid, string $what, array &$failures): void
     {
         if ($invalid > 0) {

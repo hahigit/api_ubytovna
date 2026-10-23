@@ -1,0 +1,12 @@
+{
+  "service": "Lokální atrakce API",
+  "version": "1.0",
+  "attractions": [
+    { "id": "B-OLO-01", "name": "Sloup Nejsvětější Trojice", "location": "Olomouc", "type": "outdoor", "pricing": { "price_czk": 0, "price_eur": 0.0, "is_free": true } },
+    { "id": "B-OLO-02", "name": "Zoo Olomouc", "location": "Olomouc", "type": "outdoor", "pricing": { "price_czk": 220, "price_eur": 9.0, "is_free": false } },
+    { "id": "B-OLO-03", "name": "Arcidiecézní muzeum", "location": "Olomouc", "type": "indoor", "pricing": { "price_czk": 150, "price_eur": 6.0, "is_free": false } },
+    { "id": "B-PLZ-01", "name": "Plzeňský Prazdroj - prohlídka pivovaru", "location": "Plzeň", "type": "indoor", "pricing": { "price_czk": 390, "price_eur": 16.0, "is_free": false } },
+    { "id": "B-PLZ-02", "name": "Techmania Science Center", "location": "Plzeň", "type": "indoor", "pricing": { "price_czk": 280, "price_eur": 11.5, "is_free": false } },
+    { "id": "B-PRG-01", "name": "Petřínská rozhledna", "location": "Praha", "type": "outdoor", "pricing": { "price_czk": 220, "price_eur": 9.0, "is_free": false } }
+  ]
+}

@@ -1,0 +1,10 @@
+node_modules/
+vendor/
+logs/
+.pids
+# runtime data (JSON úložiště)
+rezervace-ubytovani/data/
+planovac-vyletu/data/
+*.json.tmp
+*.json.lock
+planovac-vyletu/var/

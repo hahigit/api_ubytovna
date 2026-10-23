@@ -1,0 +1,55 @@
+{
+  "service": "Rezervace ubytování API",
+  "version": "1.0",
+  "hotels": [
+    {
+      "hotel_id": "HOTEL-PRG-01",
+      "name": "Hotel Grand Praha",
+      "location": "Praha",
+      "available_rooms": [
+        {
+          "room_id": "R101",
+          "room_type": "Standard Deluxe",
+          "capacity_persons": 2,
+          "pricing": { "price_czk": 2100, "price_eur": 85.0, "weekend_price_czk": 2350, "weekend_price_eur": 95.0 },
+          "availability": []
+        },
+        {
+          "room_id": "R205",
+          "room_type": "Executive Suite",
+          "capacity_persons": 4,
+          "pricing": { "price_czk": 3700, "price_eur": 150.0, "weekend_price_czk": 3950, "weekend_price_eur": 160.0 },
+          "availability": []
+        }
+      ]
+    },
+    {
+      "hotel_id": "HOTEL-BRN-01",
+      "name": "Hotel Petrov",
+      "location": "Brno",
+      "available_rooms": [
+        {
+          "room_id": "R12",
+          "room_type": "Dvoulůžkový pokoj",
+          "capacity_persons": 2,
+          "pricing": { "price_czk": 1600, "price_eur": 65.0, "weekend_price_czk": 1800, "weekend_price_eur": 73.0 },
+          "availability": []
+        }
+      ]
+    },
+    {
+      "hotel_id": "HOTEL-KRU-01",
+      "name": "Penzion Růže",
+      "location": "Český Krumlov",
+      "available_rooms": [
+        {
+          "room_id": "A1",
+          "room_type": "Rodinné Apartmá",
+          "capacity_persons": 3,
+          "pricing": { "price_czk": 1850, "price_eur": 75.0, "weekend_price_czk": 2050, "weekend_price_eur": 83.0 },
+          "availability": []
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "name": "rezervace-ubytovani",
+  "version": "1.0.0",
+  "description": "Rezervace ubytování API – databáze hotelů, pokojů a jejich dostupnosti",
+  "type": "module",
+  "private": true,
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "start:a": "SEED_FILE=seeds/seed_a.json DATA_FILE=data/db_a.json PORT=8001 node src/server.js",
+    "start:b": "SEED_FILE=seeds/seed_b.json DATA_FILE=data/db_b.json PORT=8002 node src/server.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.3.1",
+    "@fastify/swagger": "^9.9.2",
+    "@fastify/swagger-ui": "^6.1.2",
+    "fastify": "^5.12.7"
+  },
+  "devDependencies": {
+    "vitest": "^5.0.5"
+  }
+}

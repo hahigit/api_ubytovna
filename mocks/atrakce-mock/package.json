@@ -1,0 +1,20 @@
+{
+  "name": "atrakce-mock",
+  "version": "1.0.0",
+  "description": "Mock cizího Lokální atrakce API (pro testování více poskytovatelů)",
+  "type": "module",
+  "private": true,
+  "main": "server.js",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "start:a": "DATA_FILE=data/attractions_a.json PORT=8101 node server.js",
+    "start:b": "DATA_FILE=data/attractions_b.json PORT=8102 node server.js"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.3.1",
+    "fastify": "^5.12.7"
+  }
+}

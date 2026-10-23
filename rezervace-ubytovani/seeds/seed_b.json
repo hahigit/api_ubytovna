@@ -1,0 +1,55 @@
+{
+  "service": "Rezervace ubytování API",
+  "version": "1.0",
+  "hotels": [
+    {
+      "hotel_id": "HOTEL-OLO-01",
+      "name": "Hotel Morava Olomouc",
+      "location": "Olomouc",
+      "available_rooms": [
+        {
+          "room_id": "M1",
+          "room_type": "Jednolůžkový pokoj",
+          "capacity_persons": 1,
+          "pricing": { "price_czk": 1200, "price_eur": 49.0, "weekend_price_czk": 1350, "weekend_price_eur": 55.0 },
+          "availability": []
+        },
+        {
+          "room_id": "M4",
+          "room_type": "Rodinný pokoj",
+          "capacity_persons": 4,
+          "pricing": { "price_czk": 2600, "price_eur": 105.0, "weekend_price_czk": 2900, "weekend_price_eur": 118.0 },
+          "availability": []
+        }
+      ]
+    },
+    {
+      "hotel_id": "HOTEL-PLZ-01",
+      "name": "Hotel Na Radbuze",
+      "location": "Plzeň",
+      "available_rooms": [
+        {
+          "room_id": "P21",
+          "room_type": "Dvoulůžkový pokoj Superior",
+          "capacity_persons": 2,
+          "pricing": { "price_czk": 1750, "price_eur": 71.0, "weekend_price_czk": 1950, "weekend_price_eur": 79.0 },
+          "availability": []
+        }
+      ]
+    },
+    {
+      "hotel_id": "HOTEL-PRG-B1",
+      "name": "Pension Vltava Residence",
+      "location": "Praha",
+      "available_rooms": [
+        {
+          "room_id": "V3",
+          "room_type": "Apartmá s výhledem na řeku",
+          "capacity_persons": 3,
+          "pricing": { "price_czk": 2900, "price_eur": 118.0, "weekend_price_czk": 3200, "weekend_price_eur": 130.0 },
+          "availability": []
+        }
+      ]
+    }
+  ]
+}
